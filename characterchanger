@@ -1,0 +1,244 @@
+local gui = Instance.new("ScreenGui")
+
+gui.Name = "RectangularUI"
+
+gui.Parent = game:GetService("CoreGui")
+
+local frame = Instance.new("Frame")
+
+frame.Size = UDim2.new(0, 200, 0, 0)
+
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+frame.BorderSizePixel = 0
+
+frame.Position = UDim2.new(0.5, -100, 0.5, -175)
+
+frame.Visible = false
+
+frame.Active = true
+
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+
+corner.CornerRadius = UDim.new(0, 10)
+
+corner.Parent = frame
+
+local imageLabel = Instance.new("ImageLabel")
+
+imageLabel.Size = UDim2.new(0, 120, 0, 120)
+
+imageLabel.Position = UDim2.new(0.5, -60, 0.1, 0)
+
+imageLabel.BackgroundTransparency = 0
+
+imageLabel.Image = ""
+
+imageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
+
+imageLabel.ScaleType = Enum.ScaleType.Fit
+
+imageLabel.SizeConstraint = Enum.SizeConstraint.RelativeYY
+
+imageLabel.Parent = frame
+
+local textBox = Instance.new("TextBox")
+
+textBox.Size = UDim2.new(0, 160, 0, 30)
+
+textBox.Position = UDim2.new(0.5, -80, 0.7, -15)
+
+textBox.BackgroundTransparency = 0.8
+
+textBox.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+textBox.Font = Enum.Font.SourceSans
+
+textBox.FontSize = Enum.FontSize.Size14
+
+textBox.PlaceholderText = "Name Here"
+
+textBox.Text = ""
+
+textBox.Parent = frame
+
+local previewButton = Instance.new("TextButton")
+
+previewButton.Size = UDim2.new(0, 160, 0, 30)
+
+previewButton.Position = UDim2.new(0.5, -80, 0.8, -15)
+
+previewButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+
+previewButton.BackgroundTransparency = 0.5
+
+previewButton.BorderSizePixel = 0
+
+previewButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+previewButton.Text = "Preview"
+
+previewButton.FontSize = Enum.FontSize.Size14
+
+previewButton.AutoButtonColor = false
+
+previewButton.Parent = frame
+
+local buttonCorner = Instance.new("UICorner")
+
+buttonCorner.CornerRadius = UDim.new(0, 10)
+
+buttonCorner.Parent = previewButton
+
+local function updatePreview()
+
+    local name = textBox.Text
+
+    if name ~= "" then
+
+        local player = game:GetService("Players"):FindFirstChild(name)
+
+        if player then
+
+            local thumbnailUrl = game:GetService("Players"):GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.AvatarThumbnail, Enum.ThumbnailSize.Size420x420)
+
+            imageLabel.Image = thumbnailUrl
+
+        end
+
+    end
+
+end
+
+previewButton.MouseButton1Click:Connect(updatePreview)
+
+local toggleButton = Instance.new("TextButton")
+
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+
+toggleButton.Position = UDim2.new(0.5, -50, 0, 20)
+
+toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+
+toggleButton.BackgroundTransparency = 0.5
+
+toggleButton.BorderSizePixel = 0
+
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+toggleButton.Text = "Open Rectangular UI"
+
+toggleButton.FontSize = Enum.FontSize.Size18
+
+toggleButton.TextScaled = true
+
+toggleButton.TextWrapped = true
+
+toggleButton.AutoButtonColor = false
+
+toggleButton.Parent = gui
+
+local buttonCorner = Instance.new("UICorner")
+
+buttonCorner.CornerRadius = UDim.new(0, 10)
+
+buttonCorner.Parent = toggleButton
+
+local function toggleUI()
+
+    if frame.Visible then
+
+        local tween = game:GetService("TweenService"):Create(frame, TweenInfo.new(0.3), {Size = UDim2.new(0, 200, 0, 0)})
+
+        tween:Play()
+
+        tween.Completed:Connect(function()
+
+            frame.Visible = false
+
+        end)
+
+        toggleButton.Text = "Open Rectangular UI"
+
+    else
+
+        frame.Visible = true
+
+        local tween = game:GetService("TweenService"):Create(frame, TweenInfo.new(0.3), {Size = UDim2.new(0, 200, 0, 350)})
+
+        tween:Play()
+
+        toggleButton.Text = "Close Rectangular UI"
+
+    end
+
+end
+
+toggleButton.MouseButton1Click:Connect(toggleUI)
+
+local UserInputService = game:GetService("UserInputService")
+
+local dragging
+
+local dragInput
+
+local dragStart
+
+local startPos
+
+local function update(input)
+
+    local delta = input.Position - dragStart
+
+    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+end
+
+frame.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+
+        dragStart = input.Position
+
+        startPos = frame.Position
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+
+                dragging = false
+
+            end
+
+        end)
+
+    end
+
+end)
+
+frame.InputChanged:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragInput = input
+
+    end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+    if input == dragInput and dragging then
+
+        update(input)
+
+    end
+
+end)
+
